@@ -1,0 +1,55 @@
+# ============ KRYVANTA ============
+# Тексты используют MiniMessage: <red>, <#ff4d6d>, <gradient:#ff4d6d:#ffb347>, <bold>, <newline>
+# После правки: /kryvanta reload
+
+server-name: "KRYVANTA"
+server-ip: "m3.nexuz.ru:41058"
+discord: "https://discord.gg/bsrudxHwV"
+
+# Префикс для игроков, которым вы ничего не выдали (пусто = без префикса в чате/табе)
+default-prefix: ""
+# Как ранг показывается в скорборде, если префикса нет
+default-rank-name: "<gray>Игрок"
+
+# Формат чата. <prefix> уже содержит пробел после себя, если префикс есть
+chat-format: "<prefix><name> <dark_gray>»</dark_gray> <white><message>"
+
+# Реклама в чат
+announcements:
+  enabled: true
+  interval-seconds: 180
+  messages:
+    - "<newline><gradient:#ff4d6d:#ffb347><bold>KRYVANTA</bold></gradient> <dark_gray>»</dark_gray> <white>Играй с друзьями! <gray>Позови их на сервер.<newline><gray>Наш Discord: <click:open_url:'<discord>'><hover:show_text:'<gray>Нажми, чтобы открыть'><aqua><underlined><discord></underlined></aqua></hover></click><newline>"
+    - "<newline><gradient:#ff4d6d:#ffb347><bold>KRYVANTA</bold></gradient> <dark_gray>»</dark_gray> <white>IP сервера: <click:copy_to_clipboard:'<ip>'><hover:show_text:'<gray>Нажми, чтобы скопировать'><green><ip></green></hover></click><newline><gray>Расскажи о нас друзьям, вместе веселее!<newline>"
+
+# Список игроков (TAB). Доступно: <player> <rank> <online> <max> <ping> <tps> <server> <ip> <discord>
+tab:
+  enabled: true
+  header:
+    - ""
+    - "<gradient:#ff4d6d:#ffb347><bold>K R Y V A N T A</bold></gradient>"
+    - "<gray>Ванильное выживание"
+    - ""
+  footer:
+    - ""
+    - "<gray>Онлайн: <white><online><dark_gray> ┃ <gray>Пинг: <ping><gray> мс <dark_gray>┃ <gray>TPS: <tps>"
+    - "<gray>IP: <aqua><ip>"
+    - "<gray>Discord: <aqua><discord>"
+    - ""
+
+# Скорборд (максимум 15 строк). Игроки скрывают его командой /board
+sidebar:
+  enabled: true
+  title: "<gradient:#ff4d6d:#ffb347><bold>KRYVANTA</bold></gradient>"
+  lines:
+    - ""
+    - " <#ff4d6d>┃ <gray>Игрок: <white><player>"
+    - " <#ff4d6d>┃ <gray>Ранг: <rank>"
+    - ""
+    - " <#ffb347>┃ <gray>Онлайн: <white><online><dark_gray>/<gray><max>"
+    - " <#ffb347>┃ <gray>Пинг: <ping><gray> мс"
+    - ""
+    - " <#ff4d6d>┃ <gray>Убийств: <white><kills>"
+    - " <#ff4d6d>┃ <gray>Смертей: <white><deaths>"
+    - ""
+    - " <dark_gray><ip>"

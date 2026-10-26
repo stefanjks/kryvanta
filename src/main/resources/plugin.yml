@@ -1,0 +1,27 @@
+name: Kryvanta
+version: ${project.version}
+main: net.kryvanta.core.KryvantaPlugin
+api-version: '1.21'
+author: KRYVANTA
+description: Prefixes, TAB, scoreboard, chat and announcements for KRYVANTA
+
+commands:
+  prefix:
+    description: Управление префиксами
+    usage: /prefix help
+    aliases: [kprefix]
+  board:
+    description: Включить или скрыть скорборд
+    usage: /board [on|off]
+    aliases: [sb, sidebar]
+  kryvanta:
+    description: Служебная команда плагина
+    usage: /kryvanta reload
+
+permissions:
+  kryvanta.admin:
+    description: Управление префиксами и перезагрузка
+    default: op
+  kryvanta.board:
+    description: Команда /board
+    default: true
