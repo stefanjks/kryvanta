@@ -5,13 +5,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - run: unzip -o Kryvanta-source.zip
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 21
-          cache: maven
       - run: mvn -B package
+        working-directory: kryvanta
       - uses: actions/upload-artifact@v4
         with:
           name: Kryvanta
-          path: target/Kryvanta-*.jar
+          path: kryvanta/target/Kryvanta-*.jar
