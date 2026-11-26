@@ -195,10 +195,11 @@ public final class VipModule implements Listener {
 
     /** Состояние VIP в LuckPerms должно совпадать с данными сайта (или последним кэшем, если сайт недоступен). */
     private void reconcile(Player p) {
-        Instant want = sync.vips.get(p.getUniqueId());
+        Instant raw = sync.vips.get(p.getUniqueId());
+        Instant want = raw == null ? null : raw.truncatedTo(java.time.temporal.ChronoUnit.SECONDS); // LuckPerms хранит секунды
         boolean shouldBeVip = want != null && want.isAfter(Instant.now());
         Instant have = lp.currentExpiry(p);
-        if (shouldBeVip && (have == null || !have.equals(want))) {
+        if (shouldBeVip && (have == null || have.getEpochSecond() != want.getEpochSecond())) {
             lp.setVip(p.getUniqueId(), want);
         } else if (!shouldBeVip && have != null && dataTrusted()) {
             lp.setVip(p.getUniqueId(), null);

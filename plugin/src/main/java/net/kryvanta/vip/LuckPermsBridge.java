@@ -69,7 +69,7 @@ public final class LuckPermsBridge {
         return lp.getUserManager().modifyUser(uuid, (User u) -> {
             u.data().clear(this::isOurNode);
             if (until != null && until.isAfter(Instant.now())) {
-                u.data().add(InheritanceNode.builder(group).expiry(until).build());
+                u.data().add(InheritanceNode.builder(group).expiry(until.getEpochSecond()).build());
             }
         });
     }
