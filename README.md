@@ -1,5 +1,7 @@
 # ✦ KRYVANTA ECOSYSTEM ✦
 
+**Сайт:** https://kryvanta-lilac.vercel.app (Vercel + Neon, автообновление из GitHub)
+
 Единая система для Minecraft-сервера **KRYVANTA** (Paper 1.21.11): сайт с магазином, KRYVANTA VIP,
 партнёрская программа блогеров, промокоды, комиссии, бонусы, выплаты, админ-панель и Paper-плагин.
 Сайт и плагин связаны защищённым REST API (HMAC-подпись), данные хранятся в PostgreSQL.

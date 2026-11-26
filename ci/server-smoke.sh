@@ -16,7 +16,7 @@ printf "online-mode=false\nserver-port=25599\nlevel-type=minecraft\\:flat\nspawn
 
 # конфиг плагина с адресом сайта и секретом
 cp "$ROOT/plugin/src/main/resources/config.yml" plugins/Kryvanta/config.yml
-sed -i "s#url: \"https://kryvanta.example.com\"#url: \"http://127.0.0.1:3000\"#; s#secret: \"CHANGE_ME\"#secret: \"$PLUGIN_API_SECRET\"#; s#sync-interval-seconds: 30#sync-interval-seconds: 10#" plugins/Kryvanta/config.yml
+sed -i "s#url: \"https://kryvanta-lilac.vercel.app\"#url: \"http://127.0.0.1:3000\"#; s#secret: \"CHANGE_ME\"#secret: \"$PLUGIN_API_SECRET\"#; s#sync-interval-seconds: 30#sync-interval-seconds: 10#" plugins/Kryvanta/config.yml
 
 mkfifo console.in
 exec 3<>console.in                      # держим FIFO открытым на чтение и запись

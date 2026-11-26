@@ -17,7 +17,7 @@ chat-format: "<prefix><name> <dark_gray>»</dark_gray> <white><message>"
 # ============ KRYVANTA ECOSYSTEM: связь с сайтом ============
 api:
   # Адрес сайта (APP_URL из web/.env), без слеша на конце. Рекомендуется HTTPS.
-  url: "https://kryvanta.example.com"
+  url: "https://kryvanta-lilac.vercel.app"
   # Тот же ключ, что PLUGIN_API_SECRET на сайте. Никому не передавайте!
   secret: "CHANGE_ME"
   sync-interval-seconds: 30
