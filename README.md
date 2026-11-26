@@ -65,6 +65,8 @@ npm run build
 npm start                     # порт 3000; для постоянной работы — docs/kryvanta-web.service
 ```
 
+Без своего сервера: **Neon + Vercel**, пошагово в `docs/deploy-vercel-neon.md`.
+
 Сайт должен работать по **HTTPS** за reverse-proxy (пример nginx — `docs/nginx.conf`,
 systemd-сервис — `docs/kryvanta-web.service`). В `.env` укажите `APP_URL=https://ваш-домен`.
 
