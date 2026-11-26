@@ -4,6 +4,13 @@ Neon хранит только базу данных PostgreSQL. Сам сайт
 который берёт код прямо из GitHub-репозитория. Терминал не нужен — всё делается в браузере.
 
 ## 1. Neon — база данных
+
+**Самый простой путь:** в Vercel откройте проект → **Storage → Create Database → Neon (Serverless Postgres)** →
+план **Free** → Connect к проекту `kryvanta`. Vercel сам создаст базу и добавит переменные
+`DATABASE_URL` и `DATABASE_URL_UNPOOLED` — вручную вставлять строку подключения не нужно
+(сайт автоматически использует прямое подключение `DATABASE_URL_UNPOOLED`). Тогда шаги 1.1–1.3 пропустите.
+
+Или вручную через console.neon.tech:
 1. https://console.neon.tech → **New Project**. Имя: `kryvanta`, Postgres 16, регион **AWS Europe Central (Frankfurt)**.
 2. На странице проекта нажмите **Connect**. Выключите переключатель **Connection pooling**
    (нужна прямая строка — адрес *без* `-pooler`). Скопируйте строку вида
@@ -21,7 +28,7 @@ Neon хранит только базу данных PostgreSQL. Сам сайт
 
 | Имя | Значение |
 |---|---|
-| `DATABASE_URL` | строка из Neon (шаг 1.3) |
+| `DATABASE_URL` | строка из Neon (шаг 1.3); не нужна, если база подключена через Vercel Storage |
 | `APP_URL` | `https://<имя-проекта>.vercel.app` (после первого деплоя видно в Vercel; потом — ваш домен) |
 | `APP_SECRET` | случайная строка 64 символа |
 | `PLUGIN_API_SECRET` | случайная строка 64 символа (её же — в `plugins/Kryvanta/config.yml`) |
