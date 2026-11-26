@@ -38,6 +38,10 @@ cmd "kvip status"
 cmd "lp group kryvanta_vip info" 4
 cmd "lp group kryvanta_vip permission info" 4
 cmd "lp user $UUID parent info" 5
+MARK=$(wc -l < server.log)   # граница: всё ниже — после отзыва VIP
+(cd "$ROOT/web" && npx tsx ../ci/grant-vip.ts "$UUID" Tester revoke)
+sleep 20
+cmd "lp user $UUID parent info" 5
 cmd "stop" 5
 for i in $(seq 1 60); do kill -0 $JPID 2>/dev/null || break; sleep 1; done
 kill -9 $JPID 2>/dev/null || true
@@ -50,7 +54,8 @@ grep -q 'KRYVANTA запущен' server.log || { echo "FAIL: плагин не 
 grep -q 'модуль KRYVANTA VIP отключён\|Не удалось запустить модуль VIP' server.log && { echo "FAIL: модуль VIP не запустился"; fail=1; }
 grep -q 'сайт .*доступен' server.log && ! grep -q 'сайт .*недоступен' server.log || { echo "FAIL: нет связи с сайтом"; fail=1; }
 grep -q 'kryvanta.vip.enchant' server.log || { echo "FAIL: группа kryvanta_vip не настроена"; fail=1; }
-grep -A4 "Parents:" server.log | grep -q 'kryvanta_vip' || { echo "FAIL: игрок не получил группу kryvanta_vip"; fail=1; }
+head -n "$MARK" server.log | grep -A4 "Parents:" | grep -q 'kryvanta_vip' || { echo "FAIL: игрок не получил группу kryvanta_vip"; fail=1; }
+tail -n +"$((MARK + 1))" server.log | grep -A4 "Parents:" | grep -q 'kryvanta_vip' && { echo "FAIL: группа kryvanta_vip не снята после отзыва VIP"; fail=1; }
 if grep -nE '^\s+at net\.kryvanta' server.log ; then echo "FAIL: исключения в плагине"; fail=1; fi
-[ $fail -eq 0 ] && echo "OK: плагин запущен на Paper 1.21.11, связь с сайтом есть, VIP с сайта применён в LuckPerms"
+[ $fail -eq 0 ] && echo "OK: плагин запущен на Paper 1.21.11, связь с сайтом есть, VIP с сайта выдан и снят в LuckPerms"
 exit $fail
