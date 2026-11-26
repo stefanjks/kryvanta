@@ -51,5 +51,5 @@ grep -q 'модуль KRYVANTA VIP отключён\|Не удалось зап�
 grep -q 'сайт .*доступен' server.log && ! grep -q 'сайт .*недоступен' server.log || { echo "FAIL: нет связи с сайтом"; fail=1; }
 grep -q 'kryvanta.vip.enchant' server.log || { echo "FAIL: группа kryvanta_vip не настроена"; fail=1; }
 grep -qi 'kryvanta_vip' <(sed -n '/parent info/,$p' server.log) || { echo "FAIL: игрок не получил группу kryvanta_vip"; fail=1; }
-if grep -n 'Exception' server.log | grep -i -B2 -A8 'kryvanta' ; then echo "FAIL: исключения в плагине"; fail=1; fi
+if grep -nE '^\s+at net\.kryvanta' server.log ; then echo "FAIL: исключения в плагине"; fail=1; fi
 exit $fail

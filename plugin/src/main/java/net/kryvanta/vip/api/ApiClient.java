@@ -31,7 +31,8 @@ public final class ApiClient {
         this.baseUrl = baseUrl.replaceAll("/+$", "");
         this.secret = secret;
         this.timeout = Duration.ofSeconds(Math.max(3, timeoutSeconds));
-        this.http = HttpClient.newBuilder().connectTimeout(this.timeout).followRedirects(HttpClient.Redirect.NEVER).build();
+        // HTTP/1.1: апгрейд h2c по http:// ломает соединение с Node.js-сервером
+        this.http = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).connectTimeout(this.timeout).followRedirects(HttpClient.Redirect.NEVER).build();
     }
 
     public boolean configured() {
