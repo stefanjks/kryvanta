@@ -19,8 +19,9 @@ cp "$ROOT/plugin/src/main/resources/config.yml" plugins/Kryvanta/config.yml
 sed -i "s#url: \"https://kryvanta.example.com\"#url: \"http://127.0.0.1:3000\"#; s#secret: \"CHANGE_ME\"#secret: \"$PLUGIN_API_SECRET\"#; s#sync-interval-seconds: 30#sync-interval-seconds: 10#" plugins/Kryvanta/config.yml
 
 mkfifo console.in
-tail -f console.in | java -Xmx2G -jar paper.jar --nogui > server.log 2>&1 &
-exec 3>console.in
+exec 3<>console.in                      # держим FIFO открытым на чтение и запись
+java -Xmx2G -jar paper.jar --nogui <&3 > server.log 2>&1 &
+JPID=$!
 cmd() { echo "$1" >&3; sleep "${2:-3}"; }
 
 for i in $(seq 1 180); do grep -q 'Done (' server.log && break; sleep 1; done
@@ -37,8 +38,9 @@ cmd "kvip status"
 cmd "lp group kryvanta_vip info" 4
 cmd "lp group kryvanta_vip permission info" 4
 cmd "lp user $UUID parent info" 5
-cmd "stop" 10
-wait || true
+cmd "stop" 5
+for i in $(seq 1 60); do kill -0 $JPID 2>/dev/null || break; sleep 1; done
+kill -9 $JPID 2>/dev/null || true
 
 echo "================ server.log (Kryvanta / LuckPerms) ================"
 grep -iE 'kryvanta|luckperms|kvip|vip|exception|error|parent|kryvanta_vip' server.log | grep -v 'Downloading' | tail -120
