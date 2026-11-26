@@ -15,7 +15,11 @@ export function clientIp(req: Request): string {
   return "0.0.0.0";
 }
 
-export const ipHash = (req: Request) => keyedHash("ip:" + clientIp(req));
+/** Хэш IP-адреса или null, если реальный адрес неизвестен (нет reverse-proxy) — тогда IP-проверки пропускаются. */
+export const ipHash = (req: Request): string | null => {
+  const ip = clientIp(req);
+  return ip === "0.0.0.0" ? null : keyedHash("ip:" + ip);
+};
 
 /**
  * CSRF: cookie-сессия имеет SameSite=Lax, а все изменяющие запросы дополнительно

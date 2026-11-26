@@ -92,7 +92,7 @@ export async function ackDeliveries(ids: string[]) {
 }
 
 /** Игровое время: пакеты идемпотентны по batchId. Время на одного игрока за пакет ограничено. */
-export async function recordPlaytime(batchId: string, entries: { uuid: string; name: string; activeSeconds: number }[]) {
+export async function recordPlaytime(batchId: string, entries: { uuid: string; name: string; activeSeconds: number; rewardProgressSeconds?: number; rewardsStored?: number }[]) {
   try {
     await prisma.playtimeBatch.create({ data: { batchId } });
   } catch (e) {
@@ -102,10 +102,18 @@ export async function recordPlaytime(batchId: string, entries: { uuid: string; n
   const users: string[] = [];
   for (const e of entries.slice(0, 1000)) {
     const secs = Math.max(0, Math.min(Math.floor(e.activeSeconds), 3600)); // не больше часа на пакет
-    if (!secs) continue;
     const acc = await prisma.minecraftAccount.findUnique({ where: { uuid: e.uuid.toLowerCase() } });
     if (!acc) continue;
-    await prisma.minecraftAccount.update({ where: { id: acc.id }, data: { activePlaytimeSeconds: { increment: secs }, lastSeenAt: new Date() } });
+    await prisma.minecraftAccount.update({
+      where: { id: acc.id },
+      data: {
+        activePlaytimeSeconds: { increment: secs },
+        lastSeenAt: new Date(),
+        ...(e.rewardProgressSeconds !== undefined ? { rewardProgressSeconds: Math.max(0, Math.floor(e.rewardProgressSeconds)) } : {}),
+        ...(e.rewardsStored !== undefined ? { rewardsStored: Math.max(0, Math.min(100, Math.floor(e.rewardsStored))) } : {}),
+      },
+    });
+    if (!secs) continue;
     users.push(acc.userId);
   }
   for (const u of users) await evaluateReferral(u).catch((err) => console.error("[referral] evaluate", err));

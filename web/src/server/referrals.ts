@@ -8,11 +8,11 @@ const DAY = 86400_000;
 const today = () => new Date().toISOString().slice(0, 10);
 
 /** Переход по реферальной ссылке. Один засчитанный клик на IP в сутки. */
-export async function trackClick(rawCode: string, ipHash: string) {
+export async function trackClick(rawCode: string, ipHash: string | null) {
   const c = await checkPromo(rawCode, null);
   if (!c.ok) return null;
   await prisma.referralEvent.createMany({
-    data: [{ creatorId: c.creatorId, type: "CLICK", code: c.code, ipHash, dedupeKey: `click:${c.codeId}:${ipHash}:${today()}` }],
+    data: [{ creatorId: c.creatorId, type: "CLICK", code: c.code, ipHash, dedupeKey: ipHash ? `click:${c.codeId}:${ipHash}:${today()}` : null }],
     skipDuplicates: true,
   });
   return c;

@@ -136,6 +136,9 @@ model MinecraftAccount {
   name                  String
   linkedAt              DateTime @default(now())
   activePlaytimeSeconds Int      @default(0)
+  /// Прогресс до следующей VIP-награды и число накопленных наград (присылает плагин)
+  rewardProgressSeconds Int      @default(0)
+  rewardsStored         Int      @default(0)
   lastSeenAt            DateTime?
 
   subscriptions VipSubscription[]

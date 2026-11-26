@@ -5,7 +5,7 @@ import { keyedHash, linkCode } from "@/lib/crypto";
 import { ApiError, badRequest, conflict } from "@/lib/errors";
 import { attachReferral, onMinecraftLinked, evaluateReferral } from "./referrals";
 
-export async function registerUser(input: { email: string; username: string; password: string; refCode?: string | null; ipHash: string; locale: string }) {
+export async function registerUser(input: { email: string; username: string; password: string; refCode?: string | null; ipHash: string | null; locale: string }) {
   const email = input.email.trim().toLowerCase();
   const username = input.username.trim();
   const exists = await prisma.user.findFirst({
@@ -18,7 +18,7 @@ export async function registerUser(input: { email: string; username: string; pas
       data: { email, username, passwordHash, registrationIpHash: input.ipHash, locale: input.locale === "en" ? "en" : "ru" },
     });
     if (input.refCode) await attachReferral(tx, user.id, input.refCode, input.ipHash);
-    await audit({ actorUserId: user.id, actorType: "USER", action: "user.register", entityType: "user", entityId: user.id, ipHash: input.ipHash }, tx);
+    await audit({ actorUserId: user.id, actorType: "USER", action: "user.register", entityType: "user", entityId: user.id, ipHash: input.ipHash ?? undefined }, tx);
     return user;
   });
 }
