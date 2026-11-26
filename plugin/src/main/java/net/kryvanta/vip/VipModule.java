@@ -99,13 +99,13 @@ public final class VipModule implements Listener {
 
         int syncSec = Math.max(10, plugin.getConfig().getInt("api.sync-interval-seconds", 30));
         int playSec = Math.max(60, plugin.getConfig().getInt("api.playtime-interval-seconds", 300));
-        tasks.add(Bukkit.getScheduler().runTaskTimer(plugin, () -> { activity.tick(); size.tick(); }, 20L, 20L));
-        tasks.add(Bukkit.getScheduler().runTaskTimer(plugin, boats::tick, 1L, 1L));
-        tasks.add(Bukkit.getScheduler().runTaskTimer(plugin, brewing::tick, 1L, 1L));
-        tasks.add(Bukkit.getScheduler().runTaskTimer(plugin, this::reconcileOnline, 20L * 60, 20L * 60));
-        tasks.add(Bukkit.getScheduler().runTaskTimer(plugin, this::queuePlaytime, 20L * playSec, 20L * playSec));
-        tasks.add(Bukkit.getScheduler().runTaskTimer(plugin, () -> { for (UUID id : store.online().keySet()) brewing.persist(id); store.flushAll(); }, 20L * 60, 20L * 60));
-        tasks.add(Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this::syncNow, 40L, 20L * syncSec));
+        tasks.add(Bukkit.getScheduler().runTaskTimer(plugin, (Runnable) () -> { activity.tick(); size.tick(); }, 20L, 20L));
+        tasks.add(Bukkit.getScheduler().runTaskTimer(plugin, (Runnable) boats::tick, 1L, 1L));
+        tasks.add(Bukkit.getScheduler().runTaskTimer(plugin, (Runnable) brewing::tick, 1L, 1L));
+        tasks.add(Bukkit.getScheduler().runTaskTimer(plugin, (Runnable) this::reconcileOnline, 20L * 60, 20L * 60));
+        tasks.add(Bukkit.getScheduler().runTaskTimer(plugin, (Runnable) this::queuePlaytime, 20L * playSec, 20L * playSec));
+        tasks.add(Bukkit.getScheduler().runTaskTimer(plugin, (Runnable) () -> { for (UUID id : store.online().keySet()) brewing.persist(id); store.flushAll(); }, 20L * 60, 20L * 60));
+        tasks.add(Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, (Runnable) this::syncNow, 40L, 20L * syncSec));
     }
 
     public void disable() {
@@ -173,7 +173,7 @@ public final class VipModule implements Listener {
         PlayerData d = store.get(p.getUniqueId());
         if (d != null && !d.keepScale) d.scale = 1.0;
         reconcile(p);
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        Bukkit.getScheduler().runTaskLater(plugin, (Runnable) () -> {
             if (!p.isOnline()) return;
             size.refresh(p);
             PlayerData dd = store.get(p.getUniqueId());

@@ -118,7 +118,7 @@ public final class SizeFeature implements Listener {
     @EventHandler
     public void onRespawn(PlayerRespawnEvent e) {
         Player p = e.getPlayer();
-        Bukkit.getScheduler().runTaskLater(vip.plugin(), () -> { if (p.isOnline()) refresh(p); }, 2L);
+        Bukkit.getScheduler().runTaskLater(vip.plugin(), (Runnable) () -> { if (p.isOnline()) refresh(p); }, 2L);
     }
 
     /** Каждую секунду: окончание боя → восстановить выбранный размер. */

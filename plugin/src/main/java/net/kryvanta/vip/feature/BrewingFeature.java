@@ -27,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Содержимое хранится в данных игрока и не теряется при закрытии меню, выходе и перезапуске.
  * Варка идёт, пока игрок в сети.
  */
+@SuppressWarnings({"deprecation", "removal"})
 public final class BrewingFeature implements Listener {
     private static final int BREW_TICKS = 400;
 
