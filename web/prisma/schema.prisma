@@ -1,0 +1,578 @@
+// ✦ KRYVANTA ECOSYSTEM ✦ — PostgreSQL schema
+// Все суммы денег хранятся в копейках (Int), проценты — в базисных пунктах (1% = 100 bps).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  PLAYER
+  CREATOR
+  ADMIN
+}
+
+enum PurchaseStatus {
+  PENDING
+  PAID
+  CANCELLED
+  REFUNDED
+  FAILED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  CANCELLED
+  REFUNDED
+  FAILED
+}
+
+enum ProductType {
+  VIP
+  VIP_GIFT
+  REWARD_KIT
+  COMMANDS
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+}
+
+enum CreatorStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  BLOCKED
+}
+
+enum CreatorTier {
+  BRONZE
+  SILVER
+  GOLD
+  DIAMOND
+}
+
+enum CommissionType {
+  SALE
+  ACTIVE_PLAYER_BONUS
+  MILESTONE_BONUS
+  ADJUSTMENT
+}
+
+enum CommissionStatus {
+  HOLD
+  AVAILABLE
+  CANCELLED
+}
+
+enum ReferralStatus {
+  PENDING
+  QUALIFIED
+  REJECTED
+}
+
+enum PayoutStatus {
+  PENDING
+  APPROVED
+  PAID
+  REJECTED
+}
+
+enum DeliveryStatus {
+  PENDING
+  DELIVERED
+}
+
+model User {
+  id               String    @id @default(uuid()) @db.Uuid
+  email            String    @unique
+  username         String    @unique
+  passwordHash     String
+  role             Role      @default(PLAYER)
+  locale           String    @default("ru")
+  isBlocked        Boolean   @default(false)
+  registrationIpHash String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  sessions          Session[]
+  minecraftAccount  MinecraftAccount?
+  purchases         Purchase[]          @relation("buyer")
+  creator           Creator?
+  referral          Referral?           @relation("referred")
+  linkCodes         LinkCode[]
+  notifications     Notification[]
+  creatorApplications CreatorApplication[]
+
+  @@map("users")
+}
+
+model Session {
+  id         String   @id @default(uuid()) @db.Uuid
+  tokenHash  String   @unique
+  userId     String   @db.Uuid
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  ipHash     String?
+  userAgent  String?
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model MinecraftAccount {
+  id                    String   @id @default(uuid()) @db.Uuid
+  userId                String   @unique @db.Uuid
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  uuid                  String   @unique @db.Uuid
+  name                  String
+  linkedAt              DateTime @default(now())
+  activePlaytimeSeconds Int      @default(0)
+  lastSeenAt            DateTime?
+
+  subscriptions VipSubscription[]
+
+  @@index([name])
+  @@map("minecraft_accounts")
+}
+
+/// Однажды привязанные UUID — для защиты от повторных/«пересозданных» аккаунтов в реферальной программе.
+model MinecraftUuidHistory {
+  uuid        String   @id @db.Uuid
+  firstUserId String   @db.Uuid
+  firstSeenAt DateTime @default(now())
+
+  @@map("minecraft_uuid_history")
+}
+
+model LinkCode {
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @db.Uuid
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  codeHash   String    @unique
+  expiresAt  DateTime
+  usedAt     DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([userId])
+  @@map("link_codes")
+}
+
+model Product {
+  id             String      @id @default(uuid()) @db.Uuid
+  slug           String      @unique
+  type           ProductType
+  category       String
+  nameRu         String
+  nameEn         String
+  descriptionRu  String      @default("")
+  descriptionEn  String      @default("")
+  image          String      @default("/img/vip.svg")
+  priceKopecks   Int
+  durationDays   Int?
+  /// Для REWARD_KIT — ключ набора; для COMMANDS — список консольных команд ({player}, {uuid})
+  payload        Json        @default("{}")
+  featuresRu     String[]
+  featuresEn     String[]
+  active         Boolean     @default(true)
+  sortOrder      Int         @default(0)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  purchases Purchase[]
+
+  @@map("products")
+}
+
+model VipSubscription {
+  id                 String             @id @default(uuid()) @db.Uuid
+  minecraftAccountId String             @unique @db.Uuid
+  minecraftAccount   MinecraftAccount   @relation(fields: [minecraftAccountId], references: [id], onDelete: Cascade)
+  status             SubscriptionStatus @default(ACTIVE)
+  startedAt          DateTime           @default(now())
+  expiresAt          DateTime
+  updatedAt          DateTime           @updatedAt
+
+  history VipGrantHistory[]
+
+  @@index([status, expiresAt])
+  @@map("vip_subscriptions")
+}
+
+/// Неизменяемая история выдачи / продления / снятия VIP.
+model VipGrantHistory {
+  id             String          @id @default(uuid()) @db.Uuid
+  subscriptionId String          @db.Uuid
+  subscription   VipSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  action         String // PURCHASE | GIFT | MANUAL_GRANT | EXTEND | REVOKE | EXPIRE | REFUND
+  days           Int             @default(0)
+  previousExpiresAt DateTime?
+  newExpiresAt   DateTime?
+  purchaseId     String?         @db.Uuid
+  actorUserId    String?         @db.Uuid
+  reason         String?
+  createdAt      DateTime        @default(now())
+
+  @@index([subscriptionId])
+  @@map("vip_grant_history")
+}
+
+/// Возможности VIP (команды/функции), которые администрация может включать и выключать.
+model VipPermission {
+  key         String   @id
+  permission  String
+  labelRu     String
+  labelEn     String
+  enabled     Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  updatedAt   DateTime @updatedAt
+
+  @@map("vip_permissions")
+}
+
+/// Наборы наград за игровое время.
+model VipReward {
+  key        String   @id
+  nameRu     String
+  nameEn     String
+  tier       String // COMMON | RARE | EPIC | COSMETIC
+  weight     Int      @default(0) // вес выпадения при обычном получении (0 — только ручная выдача/покупка)
+  items      Json // [{ "material": "IRON_INGOT", "amount": 16 }]
+  enabled    Boolean  @default(true)
+  updatedAt  DateTime @updatedAt
+
+  @@map("vip_rewards")
+}
+
+model RewardHistory {
+  id          String   @id @default(uuid()) @db.Uuid
+  claimId     String   @unique @db.Uuid
+  playerUuid  String   @db.Uuid
+  playerName  String
+  rewardKey   String
+  source      String // PLAYTIME | MANUAL | PURCHASE
+  items       Json
+  claimedAt   DateTime
+  createdAt   DateTime @default(now())
+
+  @@index([playerUuid])
+  @@index([claimedAt])
+  @@map("reward_history")
+}
+
+model CreatorApplication {
+  id          String        @id @default(uuid()) @db.Uuid
+  userId      String        @db.Uuid
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  displayName String
+  platform    String
+  channelUrl  String
+  audience    Int
+  message     String        @default("")
+  status      CreatorStatus @default(PENDING)
+  reviewedBy  String?       @db.Uuid
+  reviewNote  String?
+  createdAt   DateTime      @default(now())
+  reviewedAt  DateTime?
+
+  @@index([status])
+  @@map("creator_applications")
+}
+
+model Creator {
+  id               String        @id @default(uuid()) @db.Uuid
+  userId           String        @unique @db.Uuid
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  displayName      String
+  avatarUrl        String?
+  socials          Json          @default("{}")
+  status           CreatorStatus @default(APPROVED)
+  tier             CreatorTier   @default(BRONZE)
+  /// Индивидуальная комиссия (null — стандартная из настроек)
+  commissionBps    Int?
+  /// Индивидуальный бонус за активного игрока, копейки (null — из настроек)
+  activeBonusKopecks Int?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  codes        CreatorCode[]
+  referrals    Referral[]
+  events       ReferralEvent[]
+  purchases    Purchase[]
+  commissions  Commission[]
+  payouts      PayoutRequest[]
+
+  @@map("creators")
+}
+
+model CreatorCode {
+  id           String    @id @default(uuid()) @db.Uuid
+  code         String    @unique // всегда в верхнем регистре
+  creatorId    String    @db.Uuid
+  creator      Creator   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  discountBps  Int       @default(1000)
+  maxUses      Int?
+  usesCount    Int       @default(0)
+  /// Одно использование на аккаунт
+  onePerUser   Boolean   @default(true)
+  expiresAt    DateTime?
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  purchases Purchase[]
+
+  @@index([creatorId])
+  @@map("creator_codes")
+}
+
+model Referral {
+  id              String         @id @default(uuid()) @db.Uuid
+  creatorId       String         @db.Uuid
+  creator         Creator        @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  referredUserId  String         @unique @db.Uuid
+  referredUser    User           @relation("referred", fields: [referredUserId], references: [id], onDelete: Cascade)
+  codeUsed        String
+  status          ReferralStatus @default(PENDING)
+  rejectReason    String?
+  qualifiedAt     DateTime?
+  createdAt       DateTime       @default(now())
+
+  @@index([creatorId, status])
+  @@map("referrals")
+}
+
+model ReferralEvent {
+  id         String   @id @default(uuid()) @db.Uuid
+  creatorId  String   @db.Uuid
+  creator    Creator  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  type       String // CLICK | REGISTER | QUALIFIED | REJECTED | PURCHASE
+  code       String?
+  ipHash     String?
+  userId     String?  @db.Uuid
+  /// Ключ дедупликации (например, клик с одного IP раз в сутки)
+  dedupeKey  String?  @unique
+  createdAt  DateTime @default(now())
+
+  @@index([creatorId, type, createdAt])
+  @@map("referral_events")
+}
+
+model Purchase {
+  id               String         @id @default(uuid()) @db.Uuid
+  orderNumber      Int            @unique @default(autoincrement())
+  userId           String         @db.Uuid
+  user             User           @relation("buyer", fields: [userId], references: [id])
+  productId        String         @db.Uuid
+  product          Product        @relation(fields: [productId], references: [id])
+  /// Получатель (UUID Minecraft) — для подарков отличается от покупателя
+  recipientUuid    String         @db.Uuid
+  recipientName    String
+  status           PurchaseStatus @default(PENDING)
+  basePriceKopecks Int
+  discountKopecks  Int            @default(0)
+  amountKopecks    Int
+  currency         String         @default("RUB")
+  creatorCodeId    String?        @db.Uuid
+  creatorCode      CreatorCode?   @relation(fields: [creatorCodeId], references: [id])
+  creatorId        String?        @db.Uuid
+  creator          Creator?       @relation(fields: [creatorId], references: [id])
+  /// Снимок комиссии на момент заказа
+  commissionBps    Int?
+  durationDays     Int?
+  paidAt           DateTime?
+  refundedAt       DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  payments    Payment[]
+  commissions Commission[]
+
+  @@index([userId])
+  @@index([creatorId, status])
+  @@index([status, paidAt])
+  @@map("purchases")
+}
+
+model Payment {
+  id                String        @id @default(uuid()) @db.Uuid
+  purchaseId        String        @db.Uuid
+  purchase          Purchase      @relation(fields: [purchaseId], references: [id])
+  provider          String // test | manual | yookassa
+  providerPaymentId String?
+  idempotencyKey    String        @unique
+  status            PaymentStatus @default(PENDING)
+  amountKopecks     Int
+  confirmationUrl   String?
+  rawLast           Json?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@unique([provider, providerPaymentId])
+  @@index([purchaseId])
+  @@map("payments")
+}
+
+/// Входящие события платёжных провайдеров — защита от повторной обработки.
+model PaymentEvent {
+  id          String   @id @default(uuid()) @db.Uuid
+  provider    String
+  eventKey    String
+  payload     Json
+  processedAt DateTime @default(now())
+
+  @@unique([provider, eventKey])
+  @@map("payment_events")
+}
+
+model Commission {
+  id           String           @id @default(uuid()) @db.Uuid
+  creatorId    String           @db.Uuid
+  creator      Creator          @relation(fields: [creatorId], references: [id])
+  type         CommissionType
+  status       CommissionStatus @default(HOLD)
+  amountKopecks Int
+  /// База расчёта (фактически оплаченная сумма) и ставка
+  baseKopecks  Int?
+  rateBps      Int?
+  purchaseId   String?          @db.Uuid
+  purchase     Purchase?        @relation(fields: [purchaseId], references: [id])
+  referralId   String?          @db.Uuid
+  /// Уникальный ключ операции: sale:<purchaseId>, active:<referralId>, milestone:<creatorId>:<n>, adj:<uuid>
+  operationKey String           @unique
+  availableAt  DateTime
+  note         String?
+  createdBy    String?          @db.Uuid
+  cancelledAt  DateTime?
+  cancelReason String?
+  createdAt    DateTime         @default(now())
+
+  @@index([creatorId, status])
+  @@map("commissions")
+}
+
+model PayoutRequest {
+  id             String       @id @default(uuid()) @db.Uuid
+  creatorId      String       @db.Uuid
+  creator        Creator      @relation(fields: [creatorId], references: [id])
+  amountKopecks  Int
+  method         String
+  details        String
+  status         PayoutStatus @default(PENDING)
+  adminComment   String?
+  paidAmountKopecks Int?
+  externalTxnId  String?      @unique
+  paidAt         DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  history PayoutHistory[]
+
+  @@index([creatorId, status])
+  @@map("payout_requests")
+}
+
+/// Журнал выплат: только добавление (UPDATE/DELETE запрещены триггером БД).
+model PayoutHistory {
+  id              String        @id @default(uuid()) @db.Uuid
+  payoutRequestId String        @db.Uuid
+  payoutRequest   PayoutRequest @relation(fields: [payoutRequestId], references: [id])
+  fromStatus      PayoutStatus?
+  toStatus        PayoutStatus
+  amountKopecks   Int
+  externalTxnId   String?
+  comment         String?
+  actorUserId     String?       @db.Uuid
+  createdAt       DateTime      @default(now())
+
+  @@index([payoutRequestId])
+  @@map("payout_history")
+}
+
+model Setting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+  updatedBy String?  @db.Uuid
+
+  @@map("settings")
+}
+
+/// Журнал действий: только добавление (UPDATE/DELETE запрещены триггером БД).
+model AuditLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  actorUserId String? @db.Uuid
+  actorType  String // USER | ADMIN | SYSTEM | PLUGIN | PAYMENT
+  action     String
+  entityType String?
+  entityId   String?
+  data       Json?
+  ipHash     String?
+  createdAt  DateTime @default(now())
+
+  @@index([action, createdAt])
+  @@index([entityType, entityId])
+  @@map("audit_logs")
+}
+
+/// Очередь защищённых уведомлений для игрового сервера (плагин забирает их через API).
+model PluginDelivery {
+  id          String         @id @default(uuid()) @db.Uuid
+  type        String // VIP_SYNC | NOTIFY | REWARD_CREDIT | COMMANDS | VIP_RESET
+  playerUuid  String?        @db.Uuid
+  payload     Json
+  status      DeliveryStatus @default(PENDING)
+  createdAt   DateTime       @default(now())
+  deliveredAt DateTime?
+
+  @@index([status, createdAt])
+  @@map("plugin_deliveries")
+}
+
+model Notification {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  body      String
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
+
+/// Защита API плагина от повторной отправки подписанных запросов.
+model ApiNonce {
+  nonce     String   @id
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("api_nonces")
+}
+
+/// Пакеты игрового времени от плагина (идемпотентность).
+model PlaytimeBatch {
+  batchId   String   @id @db.Uuid
+  createdAt DateTime @default(now())
+
+  @@map("playtime_batches")
+}
+
+model ServerStatus {
+  id          Int      @id @default(1)
+  online      Int      @default(0)
+  maxPlayers  Int      @default(0)
+  version     String?
+  heartbeatAt DateTime @default(now())
+
+  @@map("server_status")
+}
