@@ -37,11 +37,13 @@ class LogicTest {
         int max = 0;
         for (long seed = 0; seed < 5000; seed++) {
             int[] c = EnchantCosts.costs(seed, 15);
-            assertTrue(c[0] >= 1 && c[0] <= c[1] && c[1] <= c[2]);
-            assertTrue(c[2] >= 30, "третий слот при 15 полках всегда >= 30");
+            // каждый слот — независимый бросок (как в ванили): j ∈ [8, 31]
+            assertTrue(c[0] >= 2 && c[0] <= 10, "слот 1: " + c[0]);
+            assertTrue(c[1] >= 6 && c[1] <= 21, "слот 2: " + c[1]);
+            assertTrue(c[2] >= 30 && c[2] <= 31, "слот 3 при 15 полках: " + c[2]);
             max = Math.max(max, c[2]);
         }
-        assertEquals(30, max);
+        assertTrue(max >= 30);
         // без полок максимум 8 — именно поэтому виртуальному столу нужна эмуляция 15 полок
         for (long seed = 0; seed < 2000; seed++) assertTrue(EnchantCosts.costs(seed, 0)[2] <= 8);
     }
