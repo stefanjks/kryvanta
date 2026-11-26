@@ -1,0 +1,17 @@
+# /etc/systemd/system/kryvanta-web.service
+[Unit]
+Description=KRYVANTA website
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=kryvanta
+WorkingDirectory=/opt/kryvanta/web
+EnvironmentFile=/opt/kryvanta/web/.env
+Environment=NODE_ENV=production PORT=3000 HOSTNAME=127.0.0.1
+ExecStart=/usr/bin/npx next start -p 3000 -H 127.0.0.1
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

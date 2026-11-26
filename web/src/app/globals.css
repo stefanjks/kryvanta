@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #0a0a0b;
+  --color-coal: #121214;
+  --color-panel: #18181b;
+  --color-edge: #2a2a2e;
+  --color-mute: #a1a1aa;
+  --color-gold: #d4af37;
+  --color-gold-soft: #e9cf7a;
+  --color-gold-deep: #9c7c1e;
+  --color-chart: #b8952e;
+  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  --font-display: "Montserrat", "Segoe UI", system-ui, sans-serif;
+  --animate-fade-up: fade-up 0.6s ease-out both;
+  --animate-glow: glow 4s ease-in-out infinite;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes glow {
+  0%, 100% { filter: drop-shadow(0 0 18px rgb(212 175 55 / 0.35)); }
+  50% { filter: drop-shadow(0 0 34px rgb(212 175 55 / 0.6)); }
+}
+
+html { color-scheme: dark; }
+body {
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgb(212 175 55 / 0.09), transparent 60%),
+    radial-gradient(900px 500px at -10% 20%, rgb(212 175 55 / 0.05), transparent 60%),
+    var(--color-ink);
+  color: #fafafa;
+  min-height: 100vh;
+}
+
+@utility card {
+  @apply rounded-2xl border border-edge bg-panel/80 backdrop-blur-sm shadow-[0_10px_40px_-20px_rgb(0_0_0/0.8)];
+}
+@utility card-gold {
+  @apply rounded-2xl border border-gold/40 bg-gradient-to-b from-gold/10 to-panel/90 shadow-[0_0_60px_-25px_rgb(212_175_55/0.6)];
+}
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition
+      disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold;
+}
+@utility btn-gold {
+  @apply btn bg-gradient-to-b from-gold-soft to-gold text-ink hover:brightness-110 shadow-[0_8px_30px_-10px_rgb(212_175_55/0.7)];
+}
+@utility btn-ghost {
+  @apply btn border border-edge bg-coal text-white hover:border-gold/60 hover:text-gold-soft;
+}
+@utility btn-danger {
+  @apply btn border border-red-500/40 bg-red-500/10 text-red-300 hover:bg-red-500/20;
+}
+@utility input {
+  @apply w-full rounded-xl border border-edge bg-coal px-3.5 py-2.5 text-sm text-white placeholder:text-zinc-500
+      focus:border-gold/70 focus:outline-none focus:ring-2 focus:ring-gold/20;
+}
+@utility label {
+  @apply mb-1.5 block text-xs font-medium uppercase tracking-wider text-mute;
+}
+@utility h-title {
+  @apply font-[family-name:var(--font-display)] font-extrabold tracking-tight;
+}
+@utility gold-text {
+  @apply bg-gradient-to-r from-gold-soft via-gold to-gold-deep bg-clip-text text-transparent;
+}
+@utility chip {
+  @apply inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium;
+}
+@utility table {
+  @apply w-full text-left text-sm;
+  & th { @apply border-b border-edge px-3 py-2 text-xs font-medium uppercase tracking-wider text-mute; }
+  & td { @apply border-b border-edge/60 px-3 py-2.5 align-top; }
+}
