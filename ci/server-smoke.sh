@@ -50,6 +50,7 @@ grep -q 'KRYVANTA запущен' server.log || { echo "FAIL: плагин не 
 grep -q 'модуль KRYVANTA VIP отключён\|Не удалось запустить модуль VIP' server.log && { echo "FAIL: модуль VIP не запустился"; fail=1; }
 grep -q 'сайт .*доступен' server.log && ! grep -q 'сайт .*недоступен' server.log || { echo "FAIL: нет связи с сайтом"; fail=1; }
 grep -q 'kryvanta.vip.enchant' server.log || { echo "FAIL: группа kryvanta_vip не настроена"; fail=1; }
-grep -qi 'kryvanta_vip' <(sed -n '/parent info/,$p' server.log) || { echo "FAIL: игрок не получил группу kryvanta_vip"; fail=1; }
+grep -A4 "Parents:" server.log | grep -q 'kryvanta_vip' || { echo "FAIL: игрок не получил группу kryvanta_vip"; fail=1; }
 if grep -nE '^\s+at net\.kryvanta' server.log ; then echo "FAIL: исключения в плагине"; fail=1; fi
+[ $fail -eq 0 ] && echo "OK: плагин запущен на Paper 1.21.11, связь с сайтом есть, VIP с сайта применён в LuckPerms"
 exit $fail
