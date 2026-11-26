@@ -62,7 +62,7 @@ npm ci
 npx prisma migrate deploy     # создаёт таблицы, ограничения и триггеры
 npm run db:seed               # товары, VIP-функции, наборы наград, первый администратор
 npm run build
-ALLOW_TEST_PAYMENTS=false npm start   # или: node .next/standalone/server.js (порт 3000)
+npm start                     # порт 3000; для постоянной работы — docs/kryvanta-web.service
 ```
 
 Сайт должен работать по **HTTPS** за reverse-proxy (пример nginx — `docs/nginx.conf`,
