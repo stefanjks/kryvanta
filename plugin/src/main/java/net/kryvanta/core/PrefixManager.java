@@ -125,13 +125,26 @@ public final class PrefixManager {
 
     public int weightOf(UUID player) {
         PrefixDef d = assignedDef(player);
-        return d == null ? 0 : d.weight();
+        if (d != null) return d.weight();
+        return luckPermsPrefix(player) != null ? Math.max(0, plugin.vip().luckPerms().groupWeight(player)) : 0;
+    }
+
+    /**
+     * Префикс из LuckPerms (например, группы kryvanta_vip). Используется, если игроку не назначен
+     * префикс командой /prefix, и игрок не скрыл его в /vipsettings.
+     */
+    private String luckPermsPrefix(UUID player) {
+        if (plugin.vip() == null || !plugin.getConfig().getBoolean("vip.luckperms-prefix", true)) return null;
+        if (!plugin.vip().showPrefix(player)) return null;
+        String p = plugin.vip().luckPerms().prefix(player);
+        return p == null || p.isBlank() ? null : p;
     }
 
     /** Префикс для чата/таба/над головой с пробелом на конце, либо пустой компонент. */
     public Component spaced(UUID player) {
         PrefixDef d = assignedDef(player);
-        String text = d != null ? d.text() : plugin.getConfig().getString("default-prefix", "");
+        String lp = d == null ? luckPermsPrefix(player) : null;
+        String text = d != null ? d.text() : lp != null ? lp : plugin.getConfig().getString("default-prefix", "");
         if (text == null || text.isBlank()) return Component.empty();
         return Component.text().append(Text.flexible(text)).append(Component.space()).build();
     }
@@ -140,6 +153,8 @@ public final class PrefixManager {
     public Component rankDisplay(UUID player) {
         PrefixDef d = assignedDef(player);
         if (d != null) return Text.flexible(d.text());
+        String lp = luckPermsPrefix(player);
+        if (lp != null) return Text.flexible(lp);
         return Text.mm(plugin.getConfig().getString("default-rank-name", "<gray>Игрок"));
     }
 

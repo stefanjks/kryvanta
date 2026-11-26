@@ -3,7 +3,8 @@ version: ${project.version}
 main: net.kryvanta.core.KryvantaPlugin
 api-version: '1.21'
 author: KRYVANTA
-description: Prefixes, TAB, scoreboard, chat and announcements for KRYVANTA
+description: KRYVANTA ECOSYSTEM — prefixes, TAB, scoreboard, chat, KRYVANTA VIP, playtime rewards, website sync
+softdepend: [LuckPerms]
 
 commands:
   prefix:
@@ -17,11 +18,113 @@ commands:
   kryvanta:
     description: Служебная команда плагина
     usage: /kryvanta reload
+  kvip:
+    description: Состояние синхронизации KRYVANTA VIP
+    usage: /kvip [status|sync|info <игрок>]
+    permission: kryvanta.admin
+  link:
+    description: Привязать Minecraft-аккаунт к профилю на сайте
+    usage: /link <код>
+  vip:
+    description: Главное VIP-меню
+    usage: /vip
+    aliases: [kvipmenu]
+  size:
+    description: Изменить размер персонажа (VIP)
+    usage: /size [размер]
+  boat:
+    description: Ускорение лодки (VIP)
+    usage: /boat [0|1|2|3]
+  ec:
+    description: Эндер-сундук (VIP)
+    usage: /ec
+  anvil:
+    description: Виртуальная наковальня (VIP)
+    usage: /anvil
+  craft:
+    description: Виртуальный верстак (VIP)
+    usage: /craft
+  enchant:
+    description: Виртуальный стол зачарования (VIP)
+    usage: /enchant
+  grindstone:
+    description: Точило (VIP)
+    usage: /grindstone
+  smithing:
+    description: Кузнечный стол (VIP)
+    usage: /smithing
+  loom:
+    description: Ткацкий станок (VIP)
+    usage: /loom
+  stonecutter:
+    description: Камнерез (VIP)
+    usage: /stonecutter
+  cartography:
+    description: Стол картографа (VIP)
+    usage: /cartography
+  brew:
+    description: Личная варочная стойка (VIP)
+    usage: /brew
+  viprewards:
+    description: Награды за игровое время
+    usage: /viprewards
+  vipsettings:
+    description: Настройки VIP
+    usage: /vipsettings
 
 permissions:
   kryvanta.admin:
-    description: Управление префиксами и перезагрузка
+    description: Управление префиксами, перезагрузка, /kvip
     default: op
   kryvanta.board:
     description: Команда /board
     default: true
+  kryvanta.vip:
+    description: Статус KRYVANTA VIP (выдаётся только группой LuckPerms kryvanta_vip)
+    default: false
+    children:
+      kryvanta.vip.menu: true
+      kryvanta.vip.size: true
+      kryvanta.vip.boat: true
+      kryvanta.vip.ec: true
+      kryvanta.vip.anvil: true
+      kryvanta.vip.craft: true
+      kryvanta.vip.enchant: true
+      kryvanta.vip.grindstone: true
+      kryvanta.vip.smithing: true
+      kryvanta.vip.loom: true
+      kryvanta.vip.stonecutter: true
+      kryvanta.vip.cartography: true
+      kryvanta.vip.brew: true
+      kryvanta.vip.rewards: true
+      kryvanta.vip.settings: true
+  kryvanta.vip.menu:
+    default: false
+  kryvanta.vip.size:
+    default: false
+  kryvanta.vip.boat:
+    default: false
+  kryvanta.vip.ec:
+    default: false
+  kryvanta.vip.anvil:
+    default: false
+  kryvanta.vip.craft:
+    default: false
+  kryvanta.vip.enchant:
+    default: false
+  kryvanta.vip.grindstone:
+    default: false
+  kryvanta.vip.smithing:
+    default: false
+  kryvanta.vip.loom:
+    default: false
+  kryvanta.vip.stonecutter:
+    default: false
+  kryvanta.vip.cartography:
+    default: false
+  kryvanta.vip.brew:
+    default: false
+  kryvanta.vip.rewards:
+    default: false
+  kryvanta.vip.settings:
+    default: false

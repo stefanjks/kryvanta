@@ -9,11 +9,17 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.List;
 
+import net.kryvanta.vip.KvipCommand;
+import net.kryvanta.vip.LinkCommand;
+import net.kryvanta.vip.VipCommands;
+import net.kryvanta.vip.VipModule;
+
 public final class KryvantaPlugin extends JavaPlugin {
 
     private PrefixManager prefixes;
     private BoardManager boards;
     private BukkitTask announceTask;
+    private VipModule vip;
     private int announceIndex = 0;
 
     @Override
@@ -32,12 +38,31 @@ public final class KryvantaPlugin extends JavaPlugin {
         bind("kryvanta", new KryvantaCommand(this));
 
         startAnnouncements();
+
+        if (getServer().getPluginManager().isPluginEnabled("LuckPerms")) {
+            try {
+                vip = new VipModule(this);
+                vip.enable();
+                VipCommands vc = new VipCommands(vip);
+                for (String c : VipCommands.FEATURES.keySet()) bind(c, vc);
+                bind("link", new LinkCommand(vip));
+                bind("kvip", new KvipCommand(vip));
+                boards.refreshTeams();
+            } catch (Throwable t) {
+                getLogger().severe("Не удалось запустить модуль VIP: " + t);
+                t.printStackTrace();
+                vip = null;
+            }
+        } else {
+            getLogger().severe("LuckPerms не найден — модуль KRYVANTA VIP отключён. Установите LuckPerms 5.4+.");
+        }
         getLogger().info("KRYVANTA запущен.");
     }
 
     @Override
     public void onDisable() {
         if (announceTask != null) announceTask.cancel();
+        if (vip != null) vip.disable();
         if (boards != null) boards.stop();
     }
 
@@ -53,6 +78,7 @@ public final class KryvantaPlugin extends JavaPlugin {
         prefixes.load();
         boards.reload();
         startAnnouncements();
+        if (vip != null) vip.reload();
     }
 
     public void startAnnouncements() {
@@ -72,4 +98,5 @@ public final class KryvantaPlugin extends JavaPlugin {
 
     public PrefixManager prefixes() { return prefixes; }
     public BoardManager boards() { return boards; }
+    public VipModule vip() { return vip; }
 }

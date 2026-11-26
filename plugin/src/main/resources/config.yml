@@ -14,6 +14,31 @@ default-rank-name: "<gray>Игрок"
 # Формат чата. <prefix> уже содержит пробел после себя, если префикс есть
 chat-format: "<prefix><name> <dark_gray>»</dark_gray> <white><message>"
 
+# ============ KRYVANTA ECOSYSTEM: связь с сайтом ============
+api:
+  # Адрес сайта (APP_URL из web/.env), без слеша на конце. Рекомендуется HTTPS.
+  url: "https://kryvanta.example.com"
+  # Тот же ключ, что PLUGIN_API_SECRET на сайте. Никому не передавайте!
+  secret: "CHANGE_ME"
+  sync-interval-seconds: 30
+  playtime-interval-seconds: 300
+  timeout-seconds: 10
+
+# ============ KRYVANTA VIP ============
+vip:
+  # Группа LuckPerms (создаётся и настраивается автоматически)
+  group: "kryvanta_vip"
+  prefix-priority: 50
+  group-weight: 20
+  # Показывать префикс LuckPerms (VIP) в чате, TAB и над головой, если префикс не выдан через /prefix
+  luckperms-prefix: true
+  # Значения до первой синхронизации с сайтом (дальше настройки приходят из админ-панели сайта)
+  defaults:
+    allowed-scales: [0.5, 0.75, 1.0, 1.25, 1.5, 2.0]
+    boat-max-speeds: [0.5, 0.6, 0.7]
+    reward-interval-seconds: 10800
+    afk-timeout-seconds: 180
+
 # Реклама в чат
 announcements:
   enabled: true
