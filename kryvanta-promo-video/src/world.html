@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8"><title>KRYVANTA</title>
+<script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#000}
+#app{position:relative;width:1080px;height:1920px;overflow:hidden;font-family:"Inter","Noto Color Emoji",sans-serif;color:#fff;-webkit-font-smoothing:antialiased}
+#gl{position:absolute;left:0;top:0;width:1080px;height:1920px;image-rendering:auto}
+.ov{position:absolute;inset:0;pointer-events:none}
+#dip{background:#000;opacity:0}
+#flash{background:#fff4d6;opacity:0}
+.title{position:absolute;left:60px;right:60px;top:300px;text-align:center;font-weight:900;font-size:76px;line-height:1.08;letter-spacing:1px;
+  text-shadow:0 4px 30px rgba(0,0,0,.75),0 3px 0 rgba(0,0,0,.6);display:none}
+.title span{display:inline-block;margin:0 .14em}
+.title .g{color:#FFD54A}
+#subs{position:absolute;left:70px;right:70px;top:1300px;height:200px;display:flex;align-items:center;justify-content:center;text-align:center}
+.chunk{font-weight:800;font-size:68px;line-height:1.16;letter-spacing:-.5px}
+.w{display:inline-block;margin:0 .17em;-webkit-text-stroke:12px rgba(0,0,0,.85);paint-order:stroke fill;text-shadow:0 6px 18px rgba(0,0,0,.6)}
+.w.hl{color:#FFD54A}
+#logo{position:absolute;left:0;right:0;top:520px;display:none;flex-direction:column;align-items:center;gap:26px}
+.brand{font-weight:900;font-size:128px;letter-spacing:10px;
+  background:linear-gradient(180deg,#fff6cf 0%,#f0cf6a 40%,#d4af37 62%,#8a6a14 100%);-webkit-background-clip:text;color:transparent;
+  filter:drop-shadow(0 6px 0 rgba(0,0,0,.55)) drop-shadow(0 0 40px rgba(212,175,55,.55))}
+.star{color:#f0cf6a;-webkit-text-fill-color:#f0cf6a}
+.chip{position:absolute;left:90px;right:90px;height:118px;border-radius:30px;display:none;align-items:center;justify-content:center;gap:22px;
+  background:rgba(10,10,12,.62);border:3px solid rgba(212,175,55,.85);box-shadow:0 20px 60px rgba(0,0,0,.45),0 0 40px rgba(212,175,55,.25);
+  font-weight:900;font-size:52px;letter-spacing:1px;backdrop-filter:blur(6px)}
+.chip b{color:#FFD54A}
+#end{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:30px;
+  background:radial-gradient(ellipse 90% 60% at 50% 48%,rgba(8,8,10,.45),rgba(8,8,10,.86) 75%)}
+.ep{text-align:center}
+#ip{font-weight:900;font-size:76px;color:#fff;background:rgba(0,0,0,.55);border:4px solid #d4af37;border-radius:28px;padding:22px 34px;letter-spacing:.5px}
+.lbl{font-weight:800;font-size:34px;color:#f0cf6a;letter-spacing:6px;margin-bottom:12px}
+.pill{display:inline-block;font-weight:800;font-size:38px;padding:14px 28px;border-radius:40px;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.25);margin:6px}
+</style></head>
+<body><div id="app">
+<canvas id="gl"></canvas>
+<div class="ov" id="dip"></div>
+<div class="title" id="t1"><span>Я</span><span>ПРОСТО</span><span>ХОТЕЛ</span><br><span>СОЗДАТЬ</span><span class="g">СВОЙ</span><span class="g">СЕРВЕР...</span></div>
+<div class="title" id="t2"><span>МНОГО</span><span class="g">ВРЕМЕНИ</span></div>
+<div class="title" id="t3"><span>МНОГО</span><span class="g">СТАРАНИЙ</span></div>
+<div class="title" id="t4"><span>НО</span><span>ПОКА</span><span>МАЛО</span><br><span>ИГРОКОВ...</span></div>
+<div class="title" id="t5" style="top:250px"><span>МЫ</span><span>БУДЕМ</span><span>РАДЫ</span><br><span class="g">КАЖДОМУ!</span></div>
+<div id="logo"><img src="emblem.svg" width="230" height="230" style="filter:drop-shadow(0 0 40px rgba(212,175,55,.6))"><div class="brand"><span class="star">✦</span> KRYVANTA <span class="star">✦</span></div></div>
+<div class="chip" style="top:250px">⚔️ <b>VANILLA</b> SURVIVAL</div>
+<div class="chip" style="top:400px">🤝 ДРУЖНОЕ <b>СООБЩЕСТВО</b></div>
+<div class="chip" style="top:250px">🧩 MINECRAFT <b>1.21.11+</b></div>
+<div class="chip" style="top:400px">🔑 <b>ЛИЦЕНЗИЯ</b> + ПИРАТКА</div>
+<div id="subs"></div>
+<div id="end">
+  <div class="ep"><img src="emblem.svg" width="190" height="190" style="filter:drop-shadow(0 0 40px rgba(212,175,55,.6))"></div>
+  <div class="ep"><div class="brand" style="font-size:112px"><span class="star">✦</span> KRYVANTA <span class="star">✦</span></div></div>
+  <div class="ep"><div class="lbl">IP СЕРВЕРА</div><div id="ip">m3.nexuz.ru:41058</div></div>
+  <div class="ep"><span class="pill">Minecraft 1.21.11+</span><br><span class="pill">Java Edition · Лицензия и пиратка</span></div>
+  <div class="ep" style="font-weight:900;font-size:64px;color:#FFD54A;text-shadow:0 0 30px rgba(255,213,74,.5)">МЫ БУДЕМ РАДЫ КАЖДОМУ!</div>
+  <div class="ep" style="font-weight:700;font-size:34px;opacity:.85">Discord: discord.gg/bsrudxHwV</div>
+</div>
+<div class="ov" id="flash"></div>
+</div>
+<script type="module" src="main.js"></script>
+</body></html>
